@@ -15,7 +15,8 @@ if (empty($_POST)) {
         'register-password' => 'password',
         'register-first-name' => 'first_name',
         'register-last-name' => 'last_name',
-        'register-gender' => 'gender');
+        'register-gender' => 'gender'
+    );
 
     // Make sure all required fields are defined
     $missing_fields = array();
@@ -27,24 +28,31 @@ if (empty($_POST)) {
         }
     }
 
-    // Copy over non-required fields
-    $user_data['drivers_license_id'] = $_POST['register-drivers-license-id'];
-
     if ($missing_fields) {
         $status = 'Error!';
         $msg = 'Missing fields: ' . implode(', ', $missing_fields);
     } else {
-        user\add_user($user_data);
-        user\authenticate_user($user_data['email_address'], $user_data['password']);
-        $status = 'Success!';
-        $msg = 'You have successfully registered for Ride With Us!';
+        // Check if email already exists
+        if (user\user_exists($user_data['email_address'])) {
+            $status = 'Error!';
+            $msg = 'This email address is already registered. Please use a different email or login to your existing account.';
+        } else {
+            if (user\add_user($user_data)) {
+                user\authenticate_user($user_data['email_address'], $user_data['password']);
+                $status = 'Success!';
+                $msg = 'You have successfully registered for Ride With Us!';
+            } else {
+                $status = 'Error!';
+                $msg = 'Registration failed. Please try again.';
+            }
+        }
     }
 }
 include 'templates/head.php';
 ?>
 <div class="well ds-component ds-hover container-narrow" data-componentid="well1">
-<div class="ds-component ds-hover" data-componentid="content2">
-    <?php functions\html_respond($status, $msg); ?>
-</div>
+    <div class="ds-component ds-hover" data-componentid="content2">
+        <?php functions\html_respond($status, $msg); ?>
+    </div>
 </div>
 <?php include 'templates/footer.php'; ?>

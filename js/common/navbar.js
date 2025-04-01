@@ -5,4 +5,4 @@ jQuery(function() {
   $('.dropdown input, .dropdown label').click(function(e) {
     return e.stopPropagation();
   });
-})
+});
